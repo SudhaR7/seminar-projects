@@ -1,0 +1,8 @@
+node_modules/
+__pycache__/
+.env
+dist/
+p09_automation/certificates/
+p09_automation/messy_downloads/
+p11_agentic_ai/report.*
+p10_ai_agent/my_notes.txt

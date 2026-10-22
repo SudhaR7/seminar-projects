@@ -1,0 +1,179 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+</head><body style="margin:0">
+<title>SpendSmart MERN Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<style>
+/* Layout: app column — KPI row, form + chart pair, transactions, and an API console showing the M-E-R-N flow */
+:root{color-scheme:dark;--bg:#0a0d12;--panel:#121821;--line:#223040;--fg:#e8eef5;--muted:#8fa1b5;--accent:#3ee08f;--warn:#ffb340;--bad:#ff5c6c;
+--display:'Sora',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:auto;display:grid;gap:16px}
+header{display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px}
+h1{margin:0;font-size:2.2rem;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--accent)}
+.stack{display:flex;gap:6px;flex-wrap:wrap}
+.stack span{font-family:var(--mono);font-size:.75rem;padding:4px 10px;border:1px solid var(--line);border-radius:6px;color:var(--muted)}
+.stack b{color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.kpi small,.muted{color:var(--muted)}
+.kpi b{display:block;font-size:1.7rem;font-variant-numeric:tabular-nums;margin-top:4px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .5s}
+.warn{color:var(--warn);font-size:.9rem;margin:6px 0 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+h3{margin:0 0 12px;font-size:1rem}
+form{display:grid;gap:10px}
+input,select{padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 11px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;font:inherit;font-size:.82rem}
+.chip.on{background:var(--accent);color:#06210f;border-color:var(--accent)}
+.primary{padding:12px;border:0;border-radius:8px;background:var(--accent);color:#06210f;font:inherit;font-weight:700;cursor:pointer}
+.err{color:var(--bad);font-size:.88rem;margin:0}
+.row{display:grid;grid-template-columns:110px 1fr 84px;gap:10px;align-items:center;font-size:.88rem;margin-bottom:10px}
+.track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}.track i{display:block;height:100%;transition:width .5s}
+.row b{text-align:right;font-variant-numeric:tabular-nums}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.tx{display:grid;grid-template-columns:40px 1fr auto 28px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.tx small{display:block;color:var(--muted)}
+.ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:1.2rem}
+.del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem}.del:hover{color:var(--bad)}
+.console{font-family:var(--mono);font-size:.78rem;background:#05070a;border:1px solid var(--line);border-radius:12px;padding:14px;max-height:230px;overflow:auto}
+.console div{padding:3px 0;white-space:pre-wrap;word-break:break-word}
+.m-get{color:#6fb6ff}.m-post{color:var(--accent)}.m-del{color:var(--bad)}.st{color:var(--warn)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem}
+.flow span{padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+.flow .on{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px -2px var(--accent)}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:.85rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div id="root"></div>
+<script>
+const { useState, useEffect, useMemo } = React;
+const html = htm.bind(React.createElement);
+const CATS = { Food:"🍔", Travel:"🚌", Shopping:"🛍️", Bills:"💡", Education:"📚", Fun:"🎮" };
+const COLORS = { Food:"#ff8a5c", Travel:"#5cc8ff", Shopping:"#ff6fb5", Bills:"#ffd23f", Education:"#a98bff", Fun:"#3ee08f" };
+const BUDGET = 10000;
+const rupee = n => "₹" + Number(n).toLocaleString("en-IN");
+const EXAMPLES = [
+  { title:"Chicken biryani (example)", amount:250, category:"Food" },
+  { title:"Monthly bus pass (example)", amount:800, category:"Travel" },
+  { title:"Python course (example)", amount:2999, category:"Education" },
+  { title:"Phone recharge (example)", amount:349, category:"Bills" },
+];
+
+/* ---- "Server": Express routes + MongoDB collection, simulated in the browser ---- */
+const KEY = "spendsmart.db";
+const db = {
+  load(){ try { const v = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(v)) return v; } catch {}
+          return EXAMPLES.map((e,i)=>({ ...e, _id: oid(), date: new Date(Date.now()-i*864e5).toISOString() })); },
+  save(v){ try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} }
+};
+function oid(){ return [...crypto.getRandomValues(new Uint8Array(12))].map(b=>b.toString(16).padStart(2,"0")).join(""); }
+let collection = db.load();
+const api = {
+  async request(method, path, body, log){
+    log({ method, path, body });
+    await new Promise(r => setTimeout(r, 180)); // network latency
+    let status = 200, res;
+    if (method==="GET" && path==="/api/expenses") res = [...collection].sort((a,b)=>b.date.localeCompare(a.date));
+    else if (method==="POST") {
+      if (!body.title?.trim() || !(body.amount > 0)) { status = 400; res = { error:"ValidationError: title and a positive amount are required" }; }
+      else { res = { ...body, _id: oid(), date: new Date().toISOString() }; collection.push(res); status = 201; }
+    } else if (method==="DELETE") { collection = collection.filter(x => x._id !== path.split("/").pop()); res = { ok:true }; }
+    db.save(collection);
+    log({ status, res });
+    return { status, data: res };
+  }
+};
+
+function App(){
+  const [items, setItems] = useState([]);
+  const [form, setForm] = useState({ title:"", amount:"", category:"Food" });
+  const [filter, setFilter] = useState("All");
+  const [error, setError] = useState("");
+  const [logs, setLogs] = useState([]);
+  const [hop, setHop] = useState(-1);
+
+  const log = (e) => setLogs(l => [...l.slice(-30), { ...e, t: new Date().toLocaleTimeString("en-IN") }]);
+  const animate = async () => { for (let i=0;i<4;i++){ setHop(i); await new Promise(r=>setTimeout(r,140)); } setTimeout(()=>setHop(-1),400); };
+  const load = async () => { setItems((await api.request("GET","/api/expenses",null,log)).data); };
+  useEffect(() => { load(); }, []);
+
+  const add = async (e) => {
+    e.preventDefault(); animate();
+    const r = await api.request("POST","/api/expenses",{ ...form, amount: +form.amount }, log);
+    if (r.status !== 201) return setError(r.data.error);
+    setError(""); setForm({ title:"", amount:"", category: form.category }); load();
+  };
+  const remove = async (id) => { animate(); await api.request("DELETE",`/api/expenses/${id}`,null,log); load(); };
+  const reset = () => { collection = []; db.save(collection); load(); };
+
+  const total = items.reduce((s,x)=>s+x.amount,0);
+  const byCat = useMemo(()=>{ const m={}; items.forEach(x=>m[x.category]=(m[x.category]||0)+x.amount); return Object.entries(m).sort((a,b)=>b[1]-a[1]); },[items]);
+  const shown = filter==="All" ? items : items.filter(x=>x.category===filter);
+  const pct = Math.min(100, total/BUDGET*100);
+
+  return html`<div class="wrap">
+    <header>
+      <div><h1>Spend<em>Smart</em></h1><div class="muted">Personal expense tracker · built with the MERN stack</div></div>
+      <div class="stack"><span><b>M</b>ongoDB</span><span><b>E</b>xpress</span><span><b>R</b>eact</span><span><b>N</b>ode.js</span></div>
+    </header>
+
+    <div class="kpis">
+      <div class="panel kpi"><small>Total spent</small><b>${rupee(total)}</b></div>
+      <div class="panel kpi"><small>Transactions</small><b>${items.length}</b></div>
+      <div class="panel kpi"><small>Budget left (₹10,000/month)</small><b style=${{color: total>BUDGET?"var(--bad)":"inherit"}}>${rupee(BUDGET-total)}</b></div>
+    </div>
+    <div>
+      <div class="bar"><i style=${{width:pct+"%",background:pct>80?"var(--bad)":undefined}}></i></div>
+      ${pct>80 && html`<p class="warn">⚠️ ${pct.toFixed(0)}% of this month's budget is used.</p>`}
+    </div>
+
+    <div class="cols">
+      <form class="panel" onSubmit=${add}>
+        <h3>➕ Add expense</h3>
+        <input id="title" placeholder="What did you spend on?" value=${form.title} onInput=${e=>setForm({...form,title:e.target.value})}/>
+        <input id="amount" type="number" placeholder="Amount (₹)" value=${form.amount} onInput=${e=>setForm({...form,amount:e.target.value})}/>
+        <div class="chips">${Object.keys(CATS).map(c=>html`<button type="button" key=${c} class=${form.category===c?"chip on":"chip"} onClick=${()=>setForm({...form,category:c})}>${CATS[c]} ${c}</button>`)}</div>
+        <button class="primary">Save to database</button>
+        ${error && html`<p class="err">${error}</p>`}
+      </form>
+      <div class="panel">
+        <h3>📊 Where is the money going?</h3>
+        ${byCat.length===0 && html`<p class="muted">Add an expense to see the breakdown.</p>`}
+        ${byCat.map(([c,v])=>html`<div class="row" key=${c}><span>${CATS[c]} ${c}</span><div class="track"><i style=${{width:v/byCat[0][1]*100+"%",background:COLORS[c]}}></i></div><b>${rupee(v)}</b></div>`)}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="head"><h3>🧾 Transactions</h3>
+        <select id="filter" value=${filter} onChange=${e=>setFilter(e.target.value)}><option>All</option>${Object.keys(CATS).map(c=>html`<option key=${c}>${c}</option>`)}</select></div>
+      ${shown.map(x=>html`<div class="tx" key=${x._id}>
+        <span class="ico" style=${{background:COLORS[x.category]+"33"}}>${CATS[x.category]}</span>
+        <div><b>${x.title}</b><small>${new Date(x.date).toLocaleDateString("en-IN")} · ${x.category}</small></div>
+        <b>${rupee(x.amount)}</b>
+        <button class="del" aria-label="Delete" onClick=${()=>remove(x._id)}>✕</button></div>`)}
+      ${shown.length===0 && html`<p class="muted">No transactions yet. Add your first expense above.</p>`}
+      <button class="link" onClick=${reset}>Clear all transactions</button>
+    </div>
+
+    <div class="panel">
+      <h3>🔌 Behind the scenes: every click is an API call</h3>
+      <div class="flow">${["React UI","Express route","Node.js server","MongoDB"].map((s,i)=>html`<span key=${s} class=${hop===i?"on":""}>${s}</span>${i<3?" → ":""}`)}</div>
+      <p class="muted" style=${{fontSize:".85rem"}}>In this hosted demo the server and database run inside the browser so it works anywhere. Data stays after refresh. The full Express + MongoDB code is in the GitHub repo.</p>
+      <div class="console">${logs.slice().reverse().map((l,i)=>html`<div key=${i}>${l.method
+        ? html`<span class=${"m-"+(l.method==="DELETE"?"del":l.method.toLowerCase())}>${l.t}  ${l.method}</span> ${l.path}${l.body?"  "+JSON.stringify(l.body):""}`
+        : html`<span class="st">${l.t}  ← ${l.status}</span> ${JSON.stringify(l.res).slice(0,160)}`}</div>`)}</div>
+    </div>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+</script>
+</body></html>

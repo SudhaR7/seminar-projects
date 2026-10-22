@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechVerse 2026 | HTML + CSS + JavaScript</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="spot" id="spot"></div>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+  <nav>
+    <div class="logo">Tech<span>Verse</span></div>
+    <ul>
+      <li><a href="#tracks">Tracks</a></li>
+      <li><a href="#stats">Impact</a></li>
+      <li><a href="#register">Register</a></li>
+      <li><a href="#diff">JS Magic</a></li>
+    </ul>
+    <button class="toggle" id="themeBtn">🌙 Dark</button>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="badge">⚡ Now powered by JavaScript</div>
+      <h1>Become a <br><span class="typing" id="typing"></span></h1>
+      <p>Same page as Project 1 — but now it can <b>think, react and remember</b>.</p>
+      <div class="countdown" id="countdown">
+        <div><b id="d">0</b><small>Days</small></div>
+        <div><b id="h">0</b><small>Hours</small></div>
+        <div><b id="m">0</b><small>Mins</small></div>
+        <div><b id="s">0</b><small>Secs</small></div>
+      </div>
+      <p style="margin-top:0">⏳ until the next batch starts</p>
+      <a href="#register" class="btn btn-primary">Grab Your Seat</a>
+    </div>
+  </header>
+
+  <div class="marquee"><div class="track">
+    <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>Node.js</span><span>MongoDB</span><span>Python</span><span>ML</span><span>Gen AI</span><span>AI Agents</span>
+    <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>Node.js</span><span>MongoDB</span><span>Python</span><span>ML</span><span>Gen AI</span><span>AI Agents</span>
+  </div></div>
+
+  <section id="tracks" class="reveal">
+    <h2 class="title">Career <span class="gradient-text">Tracks</span></h2>
+    <p class="subtitle">Click a card — JavaScript responds!</p>
+    <div class="grid">
+      <div class="card" data-track="Full Stack"><div class="icon">🌐</div><h3>Full Stack Web</h3><p>HTML, CSS, JS, React, Node, MongoDB.</p></div>
+      <div class="card" data-track="Python"><div class="icon">🐍</div><h3>Python Developer</h3><p>Automation, scripting, backend.</p></div>
+      <div class="card" data-track="Data Science"><div class="icon">📊</div><h3>Data Science</h3><p>Pandas, charts, statistics.</p></div>
+      <div class="card" data-track="AI"><div class="icon">🤖</div><h3>AI & Gen AI</h3><p>ML, chatbots, AI agents.</p></div>
+    </div>
+  </section>
+
+  <section id="stats" class="reveal">
+    <h2 class="title">Our <span class="gradient-text">Impact</span></h2>
+    <p class="subtitle">Numbers count up when you scroll here</p>
+    <div class="stats">
+      <div><b data-count="5000">0</b>Students Trained</div>
+      <div><b data-count="120">0</b>Hiring Partners</div>
+      <div><b data-count="12">0</b>Live Projects</div>
+      <div><b data-count="95">0</b>% Placement Support</div>
+    </div>
+  </section>
+
+  <section id="register" class="reveal">
+    <h2 class="title">Reserve Your <span class="gradient-text">Seat</span></h2>
+    <p class="subtitle">Try submitting empty or a wrong email 😉</p>
+    <form id="form" novalidate>
+      <input id="name" type="text" placeholder="Your Name">
+      <div class="error" id="nameErr"></div>
+      <input id="email" type="text" placeholder="Email">
+      <div class="error" id="emailErr"></div>
+      <select id="track"><option value="">Choose a track</option><option>Full Stack</option><option>Python</option><option>Data Science</option><option>AI</option></select>
+      <div class="error" id="trackErr"></div>
+      <button class="btn btn-primary" type="submit">Register Now</button>
+    </form>
+    <div class="seats">Only <b id="left">50</b> seats left!</div>
+    <div class="bar"><i id="barFill" style="width:0%"></i></div>
+    <ul id="list"></ul>
+    <p class="seats"><a href="#" id="reset">↺ reset demo</a></p>
+  </section>
+
+  <section id="diff" class="reveal">
+    <h2 class="title">What did <span class="gradient-text">JavaScript</span> add?</h2>
+    <p class="subtitle">Project 1 vs Project 2</p>
+    <table class="compare">
+      <tr><th>Feature</th><th>HTML + CSS</th><th>+ JavaScript</th></tr>
+      <tr><td>Dark / Light theme</td><td>❌</td><td>✅ remembers your choice</td></tr>
+      <tr><td>Typing animation with changing words</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Live countdown timer</td><td>❌</td><td>✅ updates every second</td></tr>
+      <tr><td>Form validation</td><td>❌ accepts anything</td><td>✅ checks name, email, track</td></tr>
+      <tr><td>Saves data (seats, attendees)</td><td>❌</td><td>✅ localStorage — survives refresh</td></tr>
+      <tr><td>Animated counters & scroll reveal</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Mouse spotlight, confetti, toast messages</td><td>❌</td><td>✅</td></tr>
+    </table>
+  </section>
+
+  <footer>© 2026 TechVerse · HTML = Skeleton · CSS = Beauty · JavaScript = Brain 🧠</footer>
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

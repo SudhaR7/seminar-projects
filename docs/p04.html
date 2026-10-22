@@ -1,0 +1,231 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+</head><body style="margin:0">
+<title>Password Guardian</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column — project header, tab switch (Live demo / Python source), content panel. Python's own blue + yellow as the palette. */
+:root{color-scheme:dark;--bg:#0c1220;--panel:#131c2e;--line:#253450;--fg:#e9eef8;--muted:#93a3c0;--py:#4b8bbe;--gold:#ffd43b;--good:#4ade80;--bad:#f87171;--warn:#fbbf24;
+--display:'Outfit',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);line-height:1.55;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:auto;display:grid;gap:18px}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+h1{margin:4px 0 6px;font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.1;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:68ch}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tags span{font-family:var(--mono);font-size:.74rem;padding:3px 9px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:inherit;font-weight:600;padding:10px 14px;cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--fg);border-color:var(--gold)}
+.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+pre.src{margin:0;font-family:var(--mono);font-size:.8rem;line-height:1.6;overflow-x:auto;background:#080d18;border:1px solid var(--line);border-radius:12px;padding:18px;color:#cfd8ea;max-height:640px}
+.term{font-family:var(--mono);font-size:.82rem;background:#080d18;border:1px solid var(--line);border-radius:12px;padding:16px;white-space:pre-wrap;overflow-x:auto;color:#cfd8ea}
+.muted{color:var(--muted)}
+.btn{padding:11px 18px;border-radius:8px;border:0;background:var(--gold);color:#1a1400;font:inherit;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+input,select,textarea{padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#080d18;color:var(--fg);font:inherit}
+.note{font-size:.85rem;color:var(--muted);border-left:3px solid var(--py);padding-left:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.meter{height:14px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;transition:width .35s,background .35s}
+.big{font-size:2.2rem;font-weight:800;margin:8px 0 2px}
+.crack{font-size:1.15rem}
+.crack b{font-family:var(--mono);color:var(--gold)}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:14px;padding:0;list-style:none}
+.checks li{padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-size:.9rem}
+.checks li.ok{border-color:#2f6b45;color:var(--good)}
+.gen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.out{font-family:var(--mono);font-size:1.15rem;padding:12px 14px;border-radius:8px;background:#080d18;border:1px dashed var(--gold);word-break:break-all;flex:1;min-width:0}
+#pw{width:100%;font-family:var(--mono);font-size:1.25rem;padding:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.wall{display:flex;flex-wrap:wrap;gap:6px}
+.wall button{font-family:var(--mono);font-size:.82rem;background:#2a1418;color:var(--bad);border:1px solid #5a2630;border-radius:6px;padding:5px 9px;cursor:pointer}
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Project 4 · Simple Python</div>
+    <h1>Password Guardian 🔐</h1>
+    <p class="lede">Type any password and see how long a hacker's GPU rig (10 billion guesses per second) would need to crack it. Then generate one that would take millions of years.</p>
+    <div class="tags"><span>Python 3</span><span>functions</span><span>loops & conditions</span><span>math.log2</span><span>secrets module</span></div>
+  </header>
+  <div class="tabs" role="tablist"><button role="tab" data-tab="demo" aria-selected="true">▶ Live demo</button><button role="tab" data-tab="code" aria-selected="false">🐍 Python source</button></div>
+
+  <div data-pane="demo" class="wrap" style="gap:18px">
+    <div class="panel">
+      <label for="pw" class="muted">Test a password (nothing leaves this page)</label>
+      <input id="pw" value="kumar@123" autocomplete="off" spellcheck="false">
+      <div class="big" id="label">—</div>
+      <div class="meter"><i id="bar"></i></div>
+      <p class="crack">A hacker needs <b id="time">—</b> to crack it · <span class="muted" id="ent"></span></p>
+      <ul class="checks" id="checks"></ul>
+    </div>
+    <div class="panel">
+      <p class="muted" style="margin-top:0">Common student passwords. Tap one:</p>
+      <div class="wall" id="wall"></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3 style="margin-top:0">⚡ Strong password</h3>
+        <div class="gen"><div class="out" id="g1">—</div><button class="btn" id="b1">Generate</button></div>
+        <p class="muted">Length <input id="len" type="range" min="8" max="32" value="16" style="vertical-align:middle;padding:0"> <span id="lenv">16</span></p></div>
+      <div class="panel"><h3 style="margin-top:0">🧠 Easy-to-remember passphrase</h3>
+        <div class="gen"><div class="out" id="g2">—</div><button class="btn" id="b2">Generate</button></div>
+        <p class="muted">Random words are long and memorable.</p></div>
+    </div>
+    <p class="note">This hosted version runs the same logic in your browser. Run the original with <code>python password_guardian.py</code>.</p>
+  </div>
+  <div data-pane="code" hidden><pre class="src">&quot;&quot;&quot;
+PROJECT 4 — Password Guardian 🔐  (Simple Python, no external libraries)
+- Checks how strong your password is
+- Estimates how long a hacker needs to crack it
+- Generates super-strong passwords &amp; easy-to-remember passphrases
+Run:  python password_guardian.py
+&quot;&quot;&quot;
+import math
+import os
+import secrets
+import string
+
+GREEN, YELLOW, RED, CYAN, BOLD, END = &quot;\033[92m&quot;, &quot;\033[93m&quot;, &quot;\033[91m&quot;, &quot;\033[96m&quot;, &quot;\033[1m&quot;, &quot;\033[0m&quot;
+os.system(&quot;&quot;)  # enables colours on Windows terminals
+COMMON = {&quot;123456&quot;, &quot;password&quot;, &quot;qwerty&quot;, &quot;12345678&quot;, &quot;111111&quot;, &quot;iloveyou&quot;, &quot;admin&quot;, &quot;welcome&quot;, &quot;abc123&quot;, &quot;password123&quot;}
+WORDS = [&quot;tiger&quot;, &quot;mango&quot;, &quot;rocket&quot;, &quot;chennai&quot;, &quot;laptop&quot;, &quot;coffee&quot;, &quot;planet&quot;, &quot;dosa&quot;, &quot;galaxy&quot;, &quot;river&quot;,
+         &quot;python&quot;, &quot;thunder&quot;, &quot;silver&quot;, &quot;jungle&quot;, &quot;pixel&quot;, &quot;cricket&quot;, &quot;monsoon&quot;, &quot;dragon&quot;, &quot;ocean&quot;, &quot;lotus&quot;]
+
+
+def crack_time(seconds):
+    units = [(&quot;years&quot;, 31536000), (&quot;days&quot;, 86400), (&quot;hours&quot;, 3600), (&quot;minutes&quot;, 60), (&quot;seconds&quot;, 1)]
+    if seconds &gt; 31536000 * 1e6:
+        return &quot;millions of years 🦕&quot;
+    for name, sec in units:
+        if seconds &gt;= sec:
+            return f&quot;{seconds / sec:,.0f} {name}&quot;
+    return &quot;instantly ⚡&quot;
+
+
+def check(pw):
+    pool = 0
+    tips = []
+    if any(c.islower() for c in pw): pool += 26
+    else: tips.append(&quot;add lowercase letters&quot;)
+    if any(c.isupper() for c in pw): pool += 26
+    else: tips.append(&quot;add UPPERCASE letters&quot;)
+    if any(c.isdigit() for c in pw): pool += 10
+    else: tips.append(&quot;add numbers&quot;)
+    if any(c in string.punctuation for c in pw): pool += 32
+    else: tips.append(&quot;add symbols like @ # $ !&quot;)
+    if len(pw) &lt; 12: tips.append(&quot;make it at least 12 characters&quot;)
+
+    entropy = len(pw) * math.log2(pool) if pool else 0
+    if pw.lower() in COMMON:
+        entropy = 5
+        tips.insert(0, &quot;this is one of the MOST hacked passwords!&quot;)
+    guesses_per_sec = 1e10  # a modern GPU cracking rig
+    seconds = (2 ** entropy) / guesses_per_sec
+
+    score = min(100, int(entropy * 1.25))
+    color = RED if score &lt; 40 else YELLOW if score &lt; 70 else GREEN
+    label = &quot;WEAK 😱&quot; if score &lt; 40 else &quot;MEDIUM 😐&quot; if score &lt; 70 else &quot;STRONG 💪&quot;
+    bar = &quot;█&quot; * (score // 5) + &quot;░&quot; * (20 - score // 5)
+
+    print(f&quot;\n  Strength : {color}{bar} {score}/100  {label}{END}&quot;)
+    print(f&quot;  Entropy  : {entropy:.1f} bits&quot;)
+    print(f&quot;  Hacker needs about: {BOLD}{crack_time(seconds)}{END} to crack it&quot;)
+    if tips:
+        print(f&quot;  {YELLOW}Tips:{END} &quot; + &quot;, &quot;.join(tips))
+
+
+def generate(length=16):
+    chars = string.ascii_letters + string.digits + &quot;!@#$%^&amp;*?&quot;
+    while True:
+        pw = &quot;&quot;.join(secrets.choice(chars) for _ in range(length))
+        if (any(c.islower() for c in pw) and any(c.isupper() for c in pw)
+                and any(c.isdigit() for c in pw) and any(c in &quot;!@#$%^&amp;*?&quot; for c in pw)):
+            return pw
+
+
+def passphrase(n=4):
+    words = [secrets.choice(WORDS).capitalize() for _ in range(n)]
+    return &quot;-&quot;.join(words) + str(secrets.randbelow(90) + 10) + secrets.choice(&quot;!@#$&quot;)
+
+
+def main():
+    print(f&quot;{CYAN}{BOLD}\n  ╔══════════════════════════════════╗\n  ║     🔐  PASSWORD  GUARDIAN  🔐    ║\n  ╚══════════════════════════════════╝{END}&quot;)
+    while True:
+        print(&quot;\n  1) Check my password\n  2) Generate a strong password\n  3) Generate an easy-to-remember passphrase\n  4) Exit&quot;)
+        choice = input(&quot;  Choose: &quot;).strip()
+        if choice == &quot;1&quot;:
+            check(input(&quot;  Enter a password to test: &quot;))
+        elif choice == &quot;2&quot;:
+            n = input(&quot;  Length (default 16): &quot;).strip()
+            pw = generate(int(n) if n.isdigit() and int(n) &gt;= 8 else 16)
+            print(f&quot;\n  {GREEN}{BOLD}{pw}{END}&quot;)
+            check(pw)
+        elif choice == &quot;3&quot;:
+            pw = passphrase()
+            print(f&quot;\n  {GREEN}{BOLD}{pw}{END}&quot;)
+            check(pw)
+        elif choice == &quot;4&quot;:
+            print(&quot;  Stay safe online! 👋&quot;)
+            break
+        else:
+            print(f&quot;  {RED}Invalid choice{END}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div>
+</div>
+<script>
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==b.dataset.tab);
+}));
+</script>
+<script>
+const COMMON = ["123456","password","qwerty","12345678","111111","iloveyou","admin","welcome","abc123","password123","kumar@123","india123","chennai123"];
+const WORDS = ["tiger","mango","rocket","chennai","laptop","coffee","planet","dosa","galaxy","river","python","thunder","silver","jungle","pixel","cricket","monsoon","dragon","ocean","lotus"];
+const $ = id => document.getElementById(id);
+const rnd = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+function crackTime(s){
+  if (s > 31536000*1e6) return "millions of years 🦕";
+  for (const [n,sec] of [["years",31536000],["days",86400],["hours",3600],["minutes",60],["seconds",1]])
+    if (s >= sec) return Math.round(s/sec).toLocaleString("en-IN")+" "+n;
+  return "instantly ⚡";
+}
+function check(pw){
+  const rules = [
+    ["lowercase letters", /[a-z]/.test(pw), 26], ["UPPERCASE letters", /[A-Z]/.test(pw), 26],
+    ["numbers", /\d/.test(pw), 10], ["symbols like @ # $ !", /[^A-Za-z0-9]/.test(pw), 32]];
+  const pool = rules.reduce((p,r)=>p+(r[1]?r[2]:0),0);
+  let entropy = pw.length && pool ? pw.length*Math.log2(pool) : 0;
+  const common = COMMON.includes(pw.toLowerCase());
+  if (common) entropy = 5;
+  const score = Math.min(100, Math.round(entropy*1.25));
+  const [label,color] = score<40?["WEAK 😱","var(--bad)"]:score<70?["MEDIUM 😐","var(--warn)"]:["STRONG 💪","var(--good)"];
+  $("label").textContent = pw ? `${label}  ${score}/100` : "Type something…";
+  $("label").style.color = color;
+  $("bar").style.width = score+"%"; $("bar").style.background = color;
+  $("time").textContent = pw ? crackTime(2**entropy/1e10) : "—";
+  $("ent").textContent = `${entropy.toFixed(1)} bits of entropy`;
+  const items = rules.map(r=>[r[0],r[1]]).concat([["12+ characters", pw.length>=12],["not a famous leaked password", !common]]);
+  $("checks").innerHTML = items.map(([t,ok])=>`<li class="${ok?"ok":""}">${ok?"✅":"⬜"} ${t}</li>`).join("");
+}
+function generate(n){
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*?";
+  while (true){ const p = Array.from({length:n},()=>chars[rnd(chars.length)]).join("");
+    if (/[a-z]/.test(p)&&/[A-Z]/.test(p)&&/\d/.test(p)&&/[!@#$%^&*?]/.test(p)) return p; }
+}
+const passphrase = () => Array.from({length:4},()=>{const w=WORDS[rnd(WORDS.length)];return w[0].toUpperCase()+w.slice(1)}).join("-")+(10+rnd(90))+"!@#$"[rnd(4)];
+const use = p => { $("pw").value = p; check(p); };
+$("pw").addEventListener("input", e=>check(e.target.value));
+$("wall").innerHTML = COMMON.slice(0,10).map(p=>`<button type="button">${p}</button>`).join("");
+$("wall").onclick = e => e.target.tagName==="BUTTON" && use(e.target.textContent);
+$("len").oninput = e => $("lenv").textContent = e.target.value;
+$("b1").onclick = () => { const p = generate(+$("len").value); $("g1").textContent = p; use(p); };
+$("b2").onclick = () => { const p = passphrase(); $("g2").textContent = p; use(p); };
+check($("pw").value);
+</script>
+</body></html>

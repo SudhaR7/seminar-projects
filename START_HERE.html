@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From Zero to AI · 12 Live Projects</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Poppins,sans-serif;background:#07070f;color:#eef0ff;line-height:1.6}
+.bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 15% 10%,#3a1f8a55,transparent 40%),radial-gradient(circle at 85% 80%,#00a6d655,transparent 40%)}
+.wrap{max-width:1150px;margin:auto;padding:50px 18px}
+h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:800;text-align:center;line-height:1.1}
+.g{background:linear-gradient(90deg,#7c5cff,#00d4ff,#ff4fa3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{text-align:center;color:#a3a8c3;max-width:700px;margin:16px auto 40px;font-size:1.1rem}
+.q{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-bottom:50px}
+.box{padding:24px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.box h3{color:#00d4ff;margin-bottom:8px}
+.box p,.box li{color:#c3c7e0}
+.box ul{padding-left:18px}
+h2{font-size:2rem;margin:10px 0 24px;text-align:center}
+.level{margin:36px 0 14px;font-weight:600;color:#ffd23f;letter-spacing:2px;font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.card{padding:24px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);transition:.35s;position:relative}
+.card:hover{transform:translateY(-6px);border-color:#00d4ff;box-shadow:0 20px 40px -20px #00d4ff}
+.num{position:absolute;top:18px;right:20px;font-size:2.4rem;font-weight:800;color:rgba(255,255,255,.08)}
+.card h3{font-size:1.25rem}
+.card .what{color:#a3a8c3;margin:6px 0 12px;font-size:.93rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tags span{font-size:.75rem;padding:3px 10px;border-radius:99px;background:#7c5cff33;border:1px solid #7c5cff77}
+.why{font-size:.88rem;color:#2bd67b}
+.jobs{font-size:.82rem;color:#ffd23f;margin-top:6px}
+.run{display:inline-block;margin-top:12px;font-size:.82rem;padding:7px 14px;border-radius:10px;background:linear-gradient(90deg,#7c5cff,#00d4ff);color:#fff;text-decoration:none}
+code{font-size:.8rem;background:#000a;padding:6px 10px;border-radius:8px;display:inline-block;margin-top:12px;color:#00d4ff}
+footer{text-align:center;color:#a3a8c3;margin-top:60px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <h1>From <span class="g">Zero</span> to <span class="g">AI</span><br>12 Projects · 1 Journey</h1>
+  <p class="lead">Every project here was built for this seminar. By the end of today you'll see how a simple web page grows into AI agents that think and act on their own.</p>
+
+  <div class="q">
+    <div class="box"><h3>❓ What is a project?</h3><p>A project is a real, working solution to a real problem — built with code. Not theory, not notes: something people can <b>use</b>, <b>see</b> and <b>click</b>.</p></div>
+    <div class="box"><h3>🔥 Why does it matter?</h3><ul><li>Recruiters ask "show me what you built", not "what did you study"</li><li>It proves skill better than any marksheet</li><li>Your GitHub = your new resume</li><li>Learning by building sticks 10× better</li></ul></div>
+    <div class="box"><h3>🧭 How to choose?</h3><p>Love design? → Web. Love logic & numbers? → Python & Data. Want the future? → AI, Agents, Agentic AI. <b>Every road starts with fundamentals.</b></p></div>
+  </div>
+
+  <h2>The <span class="g">12 Projects</span></h2>
+
+  <div class="level">LEVEL 1 · WEB FOUNDATIONS</div>
+  <div class="grid">
+    <div class="card"><div class="num">01</div><h3>🎨 TechVerse — Landing Page</h3><p class="what">A stunning, animated event website using ONLY HTML & CSS. Glass cards, 3D flips, glowing blobs.</p>
+      <div class="tags"><span>HTML5</span><span>CSS3</span><span>Flexbox/Grid</span><span>Animations</span></div>
+      <p class="why">Why: every website on earth starts here.</p><p class="jobs">Roles: UI Developer, Web Designer</p>
+      <a class="run" href="p01_html_css/index.html" target="_blank">Open live ↗</a></div>
+    <div class="card"><div class="num">02</div><h3>🧠 TechVerse + JavaScript</h3><p class="what">The SAME page, now with a brain: theme switch, typing effect, countdown, form validation, saved bookings, confetti.</p>
+      <div class="tags"><span>JavaScript</span><span>DOM</span><span>Events</span><span>localStorage</span></div>
+      <p class="why">Why: JS turns a poster into an application.</p><p class="jobs">Roles: Frontend Developer</p>
+      <a class="run" href="p02_html_css_js/index.html" target="_blank">Open live ↗</a></div>
+    <div class="card"><div class="num">03</div><h3>💸 SpendSmart — MERN App</h3><p class="what">A full-stack expense tracker: React UI, Node/Express API, MongoDB database, budget alerts and charts.</p>
+      <div class="tags"><span>MongoDB</span><span>Express</span><span>React</span><span>Node.js</span><span>REST API</span></div>
+      <p class="why">Why: this is how real products (Swiggy, Zomato-style apps) are built.</p><p class="jobs">Roles: Full Stack Developer</p>
+      <code>server: npm run dev · client: npm run dev</code></div>
+  </div>
+
+  <div class="level">LEVEL 2 · PYTHON & DATA</div>
+  <div class="grid">
+    <div class="card"><div class="num">04</div><h3>🔐 Password Guardian</h3><p class="what">Checks password strength, shows how long a hacker needs to crack it, generates strong passwords.</p>
+      <div class="tags"><span>Python</span><span>Functions</span><span>Loops</span><span>secrets</span></div>
+      <p class="why">Why: Python is the easiest first language — and cybersecurity matters.</p><p class="jobs">Roles: Python Developer</p>
+      <code>python password_guardian.py</code></div>
+    <div class="card"><div class="num">05</div><h3>🎓 Student Success Science</h3><p class="what">1,200 students' data → what REALLY decides marks? Correlation, hypothesis test, AI-found student personas.</p>
+      <div class="tags"><span>Pandas</span><span>NumPy</span><span>SciPy</span><span>K-Means</span><span>Seaborn</span></div>
+      <p class="why">Why: data science turns guesses into proof.</p><p class="jobs">Roles: Data Scientist</p>
+      <code>python student_success.py</code></div>
+    <div class="card"><div class="num">06</div><h3>🎯 PlaceMe AI</h3><p class="what">Machine learning predicts your placement chance & salary — and tells you exactly what to improve.</p>
+      <div class="tags"><span>scikit-learn</span><span>Random Forest</span><span>Regression</span><span>Streamlit</span></div>
+      <p class="why">Why: ML lets computers learn from data instead of rules.</p><p class="jobs">Roles: ML Engineer</p>
+      <code>streamlit run app.py</code></div>
+    <div class="card"><div class="num">07</div><h3>🛒 ShopSense Sales Analysis</h3><p class="what">15,000 e-commerce orders cleaned & analysed → Diwali spike, top states, UPI trends, Excel report for managers.</p>
+      <div class="tags"><span>Pandas</span><span>Matplotlib</span><span>Excel</span><span>EDA</span></div>
+      <p class="why">Why: every company runs on data-driven decisions.</p><p class="jobs">Roles: Data Analyst, Business Analyst</p>
+      <code>python sales_analysis.py</code></div>
+  </div>
+
+  <div class="level">LEVEL 3 · THE AI ERA</div>
+  <div class="grid">
+    <div class="card"><div class="num">08</div><h3>🤖 BuddyAI Chatbot</h3><p class="what">Your own ChatGPT: 5 personalities, chat memory, live streaming replies, even understands images.</p>
+      <div class="tags"><span>Gen AI</span><span>LLM</span><span>Gemini API</span><span>Prompt Engineering</span></div>
+      <p class="why">Why: Gen AI is changing every job in the world.</p><p class="jobs">Roles: Gen AI Developer</p>
+      <code>streamlit run app.py</code></div>
+    <div class="card"><div class="num">09</div><h3>⚙️ AutoPilot Automation</h3><p class="what">50 certificates in seconds, a messy folder cleaned instantly, bulk emails — hours of work → one click.</p>
+      <div class="tags"><span>Python</span><span>Pillow</span><span>File I/O</span><span>SMTP</span></div>
+      <p class="why">Why: automation saves companies crores of hours.</p><p class="jobs">Roles: Automation Engineer, RPA</p>
+      <code>python autopilot.py</code></div>
+    <div class="card"><div class="num">10</div><h3>🦾 JARVIS Mini — AI Agent</h3><p class="what">An AI that doesn't just talk — it picks tools: live weather, currency, calculator, Wikipedia, notes.</p>
+      <div class="tags"><span>AI Agent</span><span>Function Calling</span><span>Tools</span><span>APIs</span></div>
+      <p class="why">Why: agents DO tasks, not just answer questions.</p><p class="jobs">Roles: AI Engineer</p>
+      <code>python jarvis_agent.py</code></div>
+    <div class="card"><div class="num">11</div><h3>🚀 AI Startup Crew — Agentic AI</h3><p class="what">4 AI agents (Planner, Researcher, Writer, Critic) collaborate, review and improve — then deliver a full report.</p>
+      <div class="tags"><span>Agentic AI</span><span>Multi-Agent</span><span>Self-Reflection</span><span>Workflows</span></div>
+      <p class="why">Why: the next big wave after chatbots.</p><p class="jobs">Roles: Agentic AI Engineer</p>
+      <code>python agent_crew.py</code></div>
+    <div class="card"><div class="num">12</div><h3>☁️ SkyCast — Live API Dashboard</h3><p class="what">Weather, 7-day forecast, hourly chart and air quality for any city — from 3 live APIs, with the raw JSON shown.</p>
+      <div class="tags"><span>REST API</span><span>fetch()</span><span>JSON</span><span>Chart.js</span></div>
+      <p class="why">Why: APIs connect every app — Google Pay, Uber, Instagram.</p><p class="jobs">Roles: Backend / Integration Developer</p>
+      <a class="run" href="p12_api_weather/index.html" target="_blank">Open live ↗</a></div>
+  </div>
+
+  <footer>Web → Full Stack → Python → Data → ML → Gen AI → Agents → Agentic AI · <b>Your journey starts today 🚀</b></footer>
+</div>
+</body>
+</html>

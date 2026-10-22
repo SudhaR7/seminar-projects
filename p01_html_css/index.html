@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechVerse 2026 | HTML + CSS Only</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background glow blobs (pure CSS animation) -->
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+  <nav>
+    <div class="logo">Tech<span>Verse</span></div>
+    <ul>
+      <li><a href="#tracks">Tracks</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#register">Register</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="badge">🚀 Live Seminar · 2026 Edition</div>
+      <h1>Build the <span class="gradient-text">Future</span><br>with Code & AI</h1>
+      <p>From your first web page to autonomous AI agents — learn the skills companies are hiring for right now.</p>
+      <a href="#register" class="btn btn-primary">Join the Journey</a>
+      <a href="#tracks" class="btn btn-ghost">Explore Tracks</a>
+    </div>
+  </header>
+
+  <!-- Infinite scrolling tech strip — zero JavaScript -->
+  <div class="marquee">
+    <div class="track">
+      <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>Node.js</span><span>MongoDB</span>
+      <span>Python</span><span>Pandas</span><span>Machine Learning</span><span>Gen AI</span><span>AI Agents</span><span>APIs</span>
+      <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>Node.js</span><span>MongoDB</span>
+      <span>Python</span><span>Pandas</span><span>Machine Learning</span><span>Gen AI</span><span>AI Agents</span><span>APIs</span>
+    </div>
+  </div>
+
+  <section id="tracks">
+    <h2 class="title">Career <span class="gradient-text">Tracks</span></h2>
+    <p class="subtitle">Hover on each card ✨</p>
+    <div class="grid">
+      <div class="card"><div class="icon">🌐</div><h3>Full Stack Web</h3><p>HTML, CSS, JS, React, Node, MongoDB — build real products end to end.</p></div>
+      <div class="card"><div class="icon">🐍</div><h3>Python Developer</h3><p>The most loved language: automation, scripting, backend and more.</p></div>
+      <div class="card"><div class="icon">📊</div><h3>Data Science</h3><p>Turn raw data into decisions with Pandas, charts and statistics.</p></div>
+      <div class="card"><div class="icon">🤖</div><h3>AI & Gen AI</h3><p>Machine learning, chatbots, AI agents — the hottest jobs of this decade.</p></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <h2 class="title">Why <span class="gradient-text">Learn</span> This?</h2>
+    <p class="subtitle">3D flip cards — made with only CSS</p>
+    <div class="grid">
+      <div class="flip"><div class="flip-inner"><div class="face front">💼 Jobs</div><div class="face back">Every company needs developers — startups, MNCs, banks, hospitals.</div></div></div>
+      <div class="flip"><div class="flip-inner"><div class="face front">💸 Salary</div><div class="face back">Skilled AI & full-stack freshers are among the highest-paid in tech.</div></div></div>
+      <div class="flip"><div class="flip-inner"><div class="face front">🌍 Freedom</div><div class="face back">Freelance, remote work, or build your own startup from your laptop.</div></div></div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <h2 class="title">Your <span class="gradient-text">Roadmap</span></h2>
+    <p class="subtitle">Step by step, zero to job-ready</p>
+    <div class="timeline">
+      <div class="step"><span>STEP 1</span><h3>Web Basics</h3><p>HTML + CSS + JavaScript</p></div>
+      <div class="step"><span>STEP 2</span><h3>Full Stack</h3><p>React, Node.js, Express, MongoDB</p></div>
+      <div class="step"><span>STEP 3</span><h3>Python & Data</h3><p>Python, Pandas, Data Analysis, ML</p></div>
+      <div class="step"><span>STEP 4</span><h3>AI Era</h3><p>Gen AI, AI Agents, Agentic AI, APIs</p></div>
+    </div>
+  </section>
+
+  <section id="register">
+    <h2 class="title">Reserve Your <span class="gradient-text">Seat</span></h2>
+    <p class="subtitle">⚠️ This form looks nice… but click Submit. Nothing smart happens. (That's what JavaScript fixes in Project 2!)</p>
+    <form>
+      <input type="text" placeholder="Your Name">
+      <input type="text" placeholder="Email">
+      <select><option>Choose a track</option><option>Full Stack</option><option>Python</option><option>Data Science</option><option>AI</option></select>
+      <button class="btn btn-primary" type="button">Register Now</button>
+    </form>
+  </section>
+
+  <footer>© 2026 TechVerse · Built with ❤️ using only HTML & CSS</footer>
+</body>
+</html>

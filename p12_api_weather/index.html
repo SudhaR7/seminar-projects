@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyCast · Live API Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Poppins,sans-serif;color:#fff;min-height:100vh;background:var(--sky,linear-gradient(160deg,#1e3c72,#2a5298));transition:background 1s}
+.wrap{max-width:1100px;margin:auto;padding:24px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:1.8rem}
+.search{display:flex;gap:8px;flex:1;max-width:520px}
+.search input{flex:1;padding:13px 18px;border-radius:14px;border:0;background:rgba(255,255,255,.18);color:#fff;font:inherit;backdrop-filter:blur(10px)}
+.search input::placeholder{color:#e8ecff}
+button{padding:12px 16px;border-radius:14px;border:0;background:rgba(255,255,255,.25);color:#fff;font:inherit;cursor:pointer}
+button:hover{background:rgba(255,255,255,.4)}
+.glass{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:22px;padding:22px;backdrop-filter:blur(14px)}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.now .icon{font-size:5rem;line-height:1;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.temp{font-size:5rem;font-weight:800;line-height:1}
+.place{font-size:1.4rem;font-weight:600}
+.sub{opacity:.85}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.mini{padding:14px;border-radius:16px;background:rgba(0,0,0,.15)}
+.mini small{opacity:.8;display:block}.mini b{font-size:1.3rem}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:18px 0}
+.day{text-align:center;padding:14px 6px;border-radius:16px;background:rgba(255,255,255,.14)}
+.day .e{font-size:2rem}
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.aqi{font-size:3rem;font-weight:800}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{font-size:.85rem;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.2);cursor:pointer}
+details{margin-top:18px}
+summary{cursor:pointer;font-weight:600}
+pre{margin-top:12px;max-height:320px;overflow:auto;font-size:.78rem;background:rgba(0,0,0,.45);padding:16px;border-radius:14px}
+.url{word-break:break-all;font-family:monospace;font-size:.8rem;background:rgba(0,0,0,.35);padding:10px;border-radius:10px;margin-top:8px}
+.loading{opacity:.5;pointer-events:none}
+@media(max-width:800px){.hero,.row2{grid-template-columns:1fr}.days{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <h1>☁️ SkyCast</h1>
+    <form class="search" id="form">
+      <input id="q" placeholder="Search any city in the world…" autocomplete="off">
+      <button>Search</button>
+      <button type="button" id="gps" title="Use my location">📍</button>
+    </form>
+  </header>
+
+  <div class="hero">
+    <div class="glass now">
+      <div class="place" id="place">Loading…</div>
+      <div class="sub" id="time"></div>
+      <div style="display:flex;align-items:center;gap:20px;margin:16px 0">
+        <div class="icon" id="icon">⏳</div>
+        <div><div class="temp" id="temp">--°</div><div class="sub" id="desc"></div></div>
+      </div>
+      <div class="sub" id="feels"></div>
+      <div class="chips" id="quick"></div>
+    </div>
+    <div class="glass grid">
+      <div class="mini"><small>💧 Humidity</small><b id="hum">--</b></div>
+      <div class="mini"><small>🌬️ Wind</small><b id="wind">--</b></div>
+      <div class="mini"><small>🌅 Sunrise</small><b id="rise">--</b></div>
+      <div class="mini"><small>🌇 Sunset</small><b id="set">--</b></div>
+      <div class="mini"><small>☔ Rain chance</small><b id="rain">--</b></div>
+      <div class="mini"><small>🔆 UV index</small><b id="uv">--</b></div>
+    </div>
+  </div>
+
+  <div class="days" id="days"></div>
+
+  <div class="row2">
+    <div class="glass"><b>Next 24 hours</b><canvas id="chart" height="120"></canvas></div>
+    <div class="glass">
+      <b>🌫️ Air Quality</b>
+      <div class="aqi" id="aqi">--</div>
+      <div id="aqiTxt" class="sub"></div>
+      <div class="sub" id="pm" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="glass" style="margin-top:18px">
+    <b>🔌 Behind the scenes — this is what an API looks like</b>
+    <p class="sub" style="margin-top:6px">The page sends a request (URL) → the server replies with JSON data → JavaScript turns it into this dashboard. 3 different free APIs are used here.</p>
+    <div class="url" id="url"></div>
+    <details><summary>Show raw JSON response</summary><pre id="raw"></pre></details>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const CODES = {0:["Clear sky","☀️"],1:["Mainly clear","🌤️"],2:["Partly cloudy","⛅"],3:["Overcast","☁️"],45:["Fog","🌫️"],48:["Fog","🌫️"],
+  51:["Light drizzle","🌦️"],53:["Drizzle","🌦️"],55:["Heavy drizzle","🌧️"],61:["Light rain","🌦️"],63:["Rain","🌧️"],65:["Heavy rain","🌧️"],
+  71:["Snow","🌨️"],73:["Snow","🌨️"],75:["Heavy snow","❄️"],80:["Showers","🌦️"],81:["Showers","🌧️"],82:["Violent showers","⛈️"],95:["Thunderstorm","⛈️"],96:["Thunderstorm","⛈️"],99:["Thunderstorm","⛈️"]};
+const SKY = {sun:"linear-gradient(160deg,#f7971e,#ffd200 40%,#56ccf2)", night:"linear-gradient(160deg,#0f2027,#203a43,#2c5364)",
+  cloud:"linear-gradient(160deg,#606c88,#3f4c6b)", rain:"linear-gradient(160deg,#373b44,#4286f4)", storm:"linear-gradient(160deg,#141e30,#243b55)"};
+let chart;
+
+async function getJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error(r.status); return r.json(); }
+const hm = (iso) => new Date(iso).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+
+async function searchCity(name){
+  const g = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(name)}`);
+  if(!g.results) return alert("City not found 😕");
+  const p = g.results[0];
+  load(p.latitude, p.longitude, `${p.name}, ${p.admin1 ?? ""} ${p.country ?? ""}`);
+}
+
+async function load(lat, lon, label){
+  $("app").classList.add("loading");
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
+      `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day`+
+      `&hourly=temperature_2m,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max`+
+      `&timezone=auto&forecast_days=7`;
+    const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
+    const [w, aq] = await Promise.all([getJSON(url), getJSON(aqUrl).catch(() => null)]);
+    render(w, aq, label);
+    $("url").textContent = "GET " + url;
+    $("raw").textContent = JSON.stringify(w.current, null, 2) + "\n\n…daily:\n" + JSON.stringify(w.daily, null, 2);
+  }catch(e){ alert("Could not reach the weather API. Check your internet 🙏"); }
+  $("app").classList.remove("loading");
+}
+
+function render(w, aq, label){
+  const c = w.current, d = w.daily, [desc, icon] = CODES[c.weather_code] ?? ["—","🌡️"];
+  $("place").textContent = "📍 " + label;
+  $("time").textContent = new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
+  $("icon").textContent = c.is_day ? icon : (c.weather_code < 3 ? "🌙" : icon);
+  $("temp").textContent = Math.round(c.temperature_2m) + "°C";
+  $("desc").textContent = desc;
+  $("feels").textContent = `Feels like ${Math.round(c.apparent_temperature)}°C · Today ${Math.round(d.temperature_2m_min[0])}° / ${Math.round(d.temperature_2m_max[0])}°`;
+  $("hum").textContent = c.relative_humidity_2m + "%";
+  $("wind").textContent = Math.round(c.wind_speed_10m) + " km/h";
+  $("rise").textContent = hm(d.sunrise[0]);
+  $("set").textContent = hm(d.sunset[0]);
+  $("rain").textContent = (d.precipitation_probability_max[0] ?? 0) + "%";
+  $("uv").textContent = d.uv_index_max[0];
+
+  const code = c.weather_code;
+  document.body.style.setProperty("--sky", !c.is_day ? SKY.night : code >= 95 ? SKY.storm : code >= 51 ? SKY.rain : code >= 3 ? SKY.cloud : SKY.sun);
+
+  $("days").innerHTML = d.time.map((t, i) => `<div class="day"><div>${i ? new Date(t).toLocaleDateString("en-IN",{weekday:"short"}) : "Today"}</div>
+    <div class="e">${(CODES[d.weather_code[i]] ?? ["","🌡️"])[1]}</div><b>${Math.round(d.temperature_2m_max[i])}°</b> <span class="sub">${Math.round(d.temperature_2m_min[i])}°</span></div>`).join("");
+
+  const start = w.hourly.time.findIndex((t) => new Date(t) >= new Date(Date.now() - 36e5));
+  const s = Math.max(0, start), hrs = w.hourly.time.slice(s, s + 24);
+  chart?.destroy();
+  chart = new Chart($("chart"), {
+    data: { labels: hrs.map((t) => new Date(t).getHours() + ":00"), datasets: [
+      { type: "line", label: "Temp °C", data: w.hourly.temperature_2m.slice(s, s + 24), borderColor: "#fff", backgroundColor: "rgba(255,255,255,.2)", fill: true, tension: .4, yAxisID: "y" },
+      { type: "bar", label: "Rain %", data: w.hourly.precipitation_probability.slice(s, s + 24), backgroundColor: "rgba(120,200,255,.5)", yAxisID: "y1" }]},
+    options: { plugins: { legend: { labels: { color: "#fff" } } },
+      scales: { x: { ticks: { color: "#fff" }, grid: { display: false } }, y: { ticks: { color: "#fff" } },
+                y1: { position: "right", max: 100, min: 0, ticks: { color: "#cde" }, grid: { display: false } } } }
+  });
+
+  if (aq?.current) {
+    const v = aq.current.us_aqi;
+    const lvl = v <= 50 ? ["Good 😊","#2bd67b"] : v <= 100 ? ["Moderate 😐","#ffd23f"] : v <= 150 ? ["Unhealthy for sensitive 😷","#ff9f43"] : v <= 200 ? ["Unhealthy 🤢","#ff4f6d"] : ["Very unhealthy ☠️","#b04fff"];
+    $("aqi").textContent = v; $("aqi").style.color = lvl[1];
+    $("aqiTxt").textContent = lvl[0];
+    $("pm").textContent = `PM2.5: ${aq.current.pm2_5} µg/m³ · PM10: ${aq.current.pm10} µg/m³`;
+  }
+}
+
+$("form").onsubmit = (e) => { e.preventDefault(); const q = $("q").value.trim(); if (q) searchCity(q); };
+$("gps").onclick = () => navigator.geolocation?.getCurrentPosition(
+  (p) => load(p.coords.latitude, p.coords.longitude, "My location"),
+  () => alert("Location permission denied"));
+$("quick").innerHTML = ["Chennai","Madurai","Bengaluru","Delhi","London","Tokyo","Dubai"].map((c) => `<span class="chip">${c}</span>`).join("");
+$("quick").onclick = (e) => e.target.classList.contains("chip") && searchCity(e.target.textContent);
+searchCity("Chennai");
+</script>
+</body>
+</html>

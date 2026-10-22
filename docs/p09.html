@@ -1,0 +1,346 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+</head><body style="margin:0">
+<title>AutoPilot Automation</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* Layout: one column — project header, tab switch (Live demo / Python source), content panel. Python's own blue + yellow as the palette. */
+:root{color-scheme:dark;--bg:#0c1220;--panel:#131c2e;--line:#253450;--fg:#e9eef8;--muted:#93a3c0;--py:#4b8bbe;--gold:#ffd43b;--good:#4ade80;--bad:#f87171;--warn:#fbbf24;
+--display:'Outfit',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);line-height:1.55;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:auto;display:grid;gap:18px}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+h1{margin:4px 0 6px;font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.1;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:68ch}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tags span{font-family:var(--mono);font-size:.74rem;padding:3px 9px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:inherit;font-weight:600;padding:10px 14px;cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--fg);border-color:var(--gold)}
+.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+pre.src{margin:0;font-family:var(--mono);font-size:.8rem;line-height:1.6;overflow-x:auto;background:#080d18;border:1px solid var(--line);border-radius:12px;padding:18px;color:#cfd8ea;max-height:640px}
+.term{font-family:var(--mono);font-size:.82rem;background:#080d18;border:1px solid var(--line);border-radius:12px;padding:16px;white-space:pre-wrap;overflow-x:auto;color:#cfd8ea}
+.muted{color:var(--muted)}
+.btn{padding:11px 18px;border-radius:8px;border:0;background:var(--gold);color:#1a1400;font:inherit;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+input,select,textarea{padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#080d18;color:var(--fg);font:inherit}
+.note{font-size:.85rem;color:var(--muted);border-left:3px solid var(--py);padding-left:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:18px}
+@media (max-width:800px){.grid2{grid-template-columns:1fr}}
+textarea{width:100%;min-height:220px;font-family:var(--mono);font-size:.82rem;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.race{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.race div{padding:12px;border-radius:10px;border:1px solid var(--line);text-align:center}
+.race b{display:block;font-size:1.6rem;font-family:var(--mono)}
+.race .py b{color:var(--good)}.race .hand b{color:var(--bad)}
+.prog{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0}
+.prog i{display:block;height:100%;width:0;background:var(--gold)}
+#preview{width:100%;border-radius:10px;border:1px solid var(--line);background:#080d18;aspect-ratio:1600/1130;max-width:100%}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:12px;max-height:330px;overflow:auto}
+.gallery img{border-radius:6px;border:1px solid var(--line);cursor:pointer}
+.folders{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}
+.folder{padding:12px;border-radius:10px;border:1px solid var(--line);min-height:90px}
+.folder h4{margin:0 0 6px;font-size:.92rem;display:flex;justify-content:space-between}
+.folder h4 span{font-family:var(--mono);color:var(--gold)}
+.mess{display:flex;flex-wrap:wrap;gap:5px;min-height:60px}
+.file{font-family:var(--mono);font-size:.7rem;padding:3px 6px;border-radius:5px;background:#0f1a2c;border:1px solid var(--line);white-space:nowrap}
+.status{font-size:.88rem;color:var(--muted);min-height:1.3em}
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Project 9 · Python Automation</div>
+    <h1>AutoPilot ⚙️ Hours of boring work, done in seconds</h1>
+    <p class="lede">Task A makes a personalised certificate for every attendee. Task B cleans a messy Downloads folder. The Python version can also email each certificate to its owner.</p>
+    <div class="tags"><span>Python</span><span>Pillow (images)</span><span>csv</span><span>pathlib + shutil</span><span>smtplib (email)</span></div>
+  </header>
+  <div class="tabs" role="tablist"><button role="tab" data-tab="demo" aria-selected="true">▶ Run the bots</button><button role="tab" data-tab="code" aria-selected="false">🐍 Python source</button></div>
+
+  <div data-pane="demo" class="wrap">
+    <div class="grid2">
+      <div class="panel">
+        <h3 style="margin-top:0">Task A · Bulk certificates</h3>
+        <label for="names" class="muted">Attendees (one per line: Name, Course). Paste your real list here.</label>
+        <textarea id="names" spellcheck="false"></textarea>
+        <div class="row" style="margin-top:10px">
+          <input id="event" value="TechVerse 2026 Seminar" style="flex:1;min-width:0" aria-label="Event name">
+          <button class="btn" id="go" type="button">⚡ Generate all</button>
+        </div>
+        <div class="prog"><i id="bar"></i></div>
+        <div class="status" id="status">Ready.</div>
+        <div class="race"><div class="py"><span class="muted">Python bot</span><b id="tBot">0.0 s</b></div><div class="hand"><span class="muted">By hand in Canva (≈3 min each)</span><b id="tHand">0 min</b></div></div>
+        <div class="row" style="margin-top:12px"><button class="btn ghost" id="zip" type="button" hidden>⬇ Download all (ZIP)</button><span class="status" id="dl"></span></div>
+      </div>
+      <div class="panel">
+        <canvas id="preview" width="1600" height="1130"></canvas>
+        <div class="gallery" id="gallery"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="row" style="justify-content:space-between"><h3 style="margin:0">Task B · Clean a messy Downloads folder</h3>
+        <div class="row"><button class="btn ghost" id="mess" type="button">🗑️ Make a mess</button><button class="btn" id="sort" type="button">🧹 Organise</button></div></div>
+      <div class="mess" id="pile" style="margin-top:12px"></div>
+      <div class="folders" id="folders"></div>
+      <div class="status" id="sStatus"></div>
+    </div>
+  </div>
+  <div data-pane="code" hidden><pre class="src">&quot;&quot;&quot;
+PROJECT 9 — AutoPilot ⚙️  (Python Automation)
+Boring work that takes HOURS by hand → done in SECONDS by Python.
+
+  Task A: Generate personalised certificates for every attendee (from a CSV) → PNG + one combined PDF
+  Task B: Clean a messy Downloads folder — sort 100s of files into folders automatically
+  Task C: (optional) Email each certificate to its owner via Gmail
+
+Run:  python autopilot.py
+&quot;&quot;&quot;
+import csv
+import random
+import shutil
+import smtplib
+import time
+from datetime import date
+from email.message import EmailMessage
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
+
+BASE = Path(__file__).parent
+
+
+def font(size, bold=False):
+    names = ([&quot;arialbd.ttf&quot;, &quot;DejaVuSans-Bold.ttf&quot;, &quot;Arial Bold.ttf&quot;] if bold else [&quot;arial.ttf&quot;, &quot;DejaVuSans.ttf&quot;, &quot;Arial.ttf&quot;])
+    for n in names:
+        for folder in [&quot;&quot;, &quot;C:/Windows/Fonts/&quot;, &quot;/usr/share/fonts/truetype/dejavu/&quot;, &quot;/Library/Fonts/&quot;, &quot;/System/Library/Fonts/Supplemental/&quot;]:
+            try:
+                return ImageFont.truetype(folder + n, size)
+            except OSError:
+                pass
+    return ImageFont.load_default(size=size)
+
+
+# ---------------------------------------------------------------- Task A
+def make_sample_csv(path):
+    first = [&quot;Arun&quot;, &quot;Priya&quot;, &quot;Karthik&quot;, &quot;Divya&quot;, &quot;Vignesh&quot;, &quot;Keerthana&quot;, &quot;Surya&quot;, &quot;Nivetha&quot;, &quot;Rahul&quot;, &quot;Swetha&quot;,
+             &quot;Aakash&quot;, &quot;Harini&quot;, &quot;Gokul&quot;, &quot;Lavanya&quot;, &quot;Sanjay&quot;, &quot;Meena&quot;, &quot;Pradeep&quot;, &quot;Yamini&quot;, &quot;Dinesh&quot;, &quot;Janani&quot;]
+    last = [&quot;Kumar&quot;, &quot;R&quot;, &quot;S&quot;, &quot;Raj&quot;, &quot;M&quot;, &quot;Krishnan&quot;, &quot;V&quot;, &quot;Murugan&quot;, &quot;Selvam&quot;, &quot;Balaji&quot;]
+    with open(path, &quot;w&quot;, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        w = csv.writer(f)
+        w.writerow([&quot;name&quot;, &quot;email&quot;, &quot;course&quot;])
+        for i in range(50):
+            n = f&quot;{random.choice(first)} {random.choice(last)}&quot;
+            w.writerow([n, f&quot;{n.split()[0].lower()}{i}@example.com&quot;, random.choice([&quot;Full Stack&quot;, &quot;Python&quot;, &quot;Data Science&quot;, &quot;Gen AI&quot;])])
+
+
+def certificate(name, course, out):
+    W, H = 1600, 1130
+    img = Image.new(&quot;RGB&quot;, (W, H), &quot;#0b0b1e&quot;)
+    d = ImageDraw.Draw(img)
+    for i in range(H):  # gradient background
+        d.line([(0, i), (W, i)], fill=(11 + i // 40, 11 + i // 60, 30 + i // 18))
+    d.rectangle([40, 40, W - 40, H - 40], outline=&quot;#ffd23f&quot;, width=6)
+    d.rectangle([60, 60, W - 60, H - 60], outline=&quot;#7c5cff&quot;, width=2)
+    c = lambda y, text, f, fill: d.text((W / 2, y), text, font=f, fill=fill, anchor=&quot;mm&quot;)
+    c(190, &quot;CERTIFICATE&quot;, font(96, True), &quot;#ffd23f&quot;)
+    c(275, &quot;OF  ACHIEVEMENT&quot;, font(40), &quot;#00d4ff&quot;)
+    c(400, &quot;This is proudly presented to&quot;, font(36), &quot;#cfd3ff&quot;)
+    c(510, name, font(92, True), &quot;#ffffff&quot;)
+    d.line([(W / 2 - 400, 575), (W / 2 + 400, 575)], fill=&quot;#ffd23f&quot;, width=3)
+    c(660, f&quot;for successfully attending the TechVerse 2026 seminar on&quot;, font(34), &quot;#cfd3ff&quot;)
+    c(730, course, font(58, True), &quot;#2bd67b&quot;)
+    c(900, date.today().strftime(&quot;%d %B %Y&quot;), font(30), &quot;#a3a8c3&quot;)
+    c(950, &quot;Date&quot;, font(24), &quot;#6b6f8f&quot;)
+    d.ellipse([W - 330, 820, W - 150, 1000], outline=&quot;#ffd23f&quot;, width=5)
+    d.text((W - 240, 910), &quot;VERIFIED&quot;, font=font(26, True), fill=&quot;#ffd23f&quot;, anchor=&quot;mm&quot;)
+    img.save(out)
+    return img
+
+
+def task_certificates():
+    data = BASE / &quot;attendees.csv&quot;
+    if not data.exists():
+        make_sample_csv(data)
+        print(&quot;   📝 Created sample attendees.csv (50 people) — replace with your real list anytime&quot;)
+    out = BASE / &quot;certificates&quot;
+    out.mkdir(exist_ok=True)
+    t = time.time()
+    pages = []
+    with open(data, encoding=&quot;utf-8&quot;) as f:
+        rows = list(csv.DictReader(f))
+    for i, r in enumerate(rows, 1):
+        file = out / f&quot;{i:03d}_{r[&#x27;name&#x27;].replace(&#x27; &#x27;, &#x27;_&#x27;)}.png&quot;
+        pages.append(certificate(r[&quot;name&quot;], r[&quot;course&quot;], file))
+        print(f&quot;\r   🖨️  {i}/{len(rows)}  {r[&#x27;name&#x27;]:&lt;25}&quot;, end=&quot;&quot;)
+    pages[0].save(out / &quot;ALL_CERTIFICATES.pdf&quot;, save_all=True, append_images=pages[1:])
+    sec = time.time() - t
+    print(f&quot;\n   ✅ {len(rows)} certificates + 1 PDF in {sec:.1f} sec  (by hand ≈ {len(rows) * 3} minutes!)&quot;)
+    print(f&quot;   📂 {out}&quot;)
+
+
+# ---------------------------------------------------------------- Task B
+TYPES = {&quot;Images&quot;: [&quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.gif&quot;, &quot;.webp&quot;], &quot;Documents&quot;: [&quot;.pdf&quot;, &quot;.docx&quot;, &quot;.txt&quot;, &quot;.pptx&quot;, &quot;.xlsx&quot;],
+         &quot;Videos&quot;: [&quot;.mp4&quot;, &quot;.mkv&quot;, &quot;.mov&quot;], &quot;Music&quot;: [&quot;.mp3&quot;, &quot;.wav&quot;], &quot;Code&quot;: [&quot;.py&quot;, &quot;.js&quot;, &quot;.html&quot;, &quot;.css&quot;, &quot;.java&quot;],
+         &quot;Archives&quot;: [&quot;.zip&quot;, &quot;.rar&quot;, &quot;.7z&quot;], &quot;Installers&quot;: [&quot;.exe&quot;, &quot;.msi&quot;, &quot;.apk&quot;]}
+
+
+def task_organize(folder=None):
+    if not folder:
+        folder = BASE / &quot;messy_downloads&quot;
+        folder.mkdir(exist_ok=True)
+        words = [&quot;resume&quot;, &quot;IMG_2041&quot;, &quot;notes&quot;, &quot;project_final_final&quot;, &quot;song&quot;, &quot;setup&quot;, &quot;marksheet&quot;, &quot;trip&quot;, &quot;assignment&quot;, &quot;meme&quot;]
+        exts = sum(TYPES.values(), []) + [&quot;.xyz&quot;]
+        for i in range(120):
+            (folder / f&quot;{random.choice(words)}_{i}{random.choice(exts)}&quot;).write_text(&quot;demo&quot;)
+        print(f&quot;   🗑️  Created a messy demo folder with 120 random files&quot;)
+    folder = Path(folder)
+    moved = {}
+    for f in folder.iterdir():
+        if f.is_file():
+            kind = next((k for k, v in TYPES.items() if f.suffix.lower() in v), &quot;Others&quot;)
+            (folder / kind).mkdir(exist_ok=True)
+            shutil.move(str(f), folder / kind / f.name)
+            moved[kind] = moved.get(kind, 0) + 1
+    for k, v in sorted(moved.items(), key=lambda x: -x[1]):
+        print(f&quot;   📁 {k:&lt;11} {&#x27;■&#x27; * (v // 2)} {v}&quot;)
+    print(f&quot;   ✅ Organised {sum(moved.values())} files in {folder}&quot;)
+
+
+# ---------------------------------------------------------------- Task C
+def task_email():
+    print(&quot;   Uses Gmail + an App Password (Google Account → Security → App passwords)&quot;)
+    sender = input(&quot;   Your Gmail: &quot;).strip()
+    pw = input(&quot;   App password: &quot;).strip()
+    data, out = BASE / &quot;attendees.csv&quot;, BASE / &quot;certificates&quot;
+    if not sender or not pw or not out.exists():
+        return print(&quot;   ⚠️ Need Gmail, app password and certificates (run Task A first)&quot;)
+    dry = input(&quot;   Dry run (only print, don&#x27;t send)? [Y/n]: &quot;).strip().lower() != &quot;n&quot;
+    with open(data, encoding=&quot;utf-8&quot;) as f:
+        rows = list(csv.DictReader(f))
+    server = None if dry else smtplib.SMTP_SSL(&quot;smtp.gmail.com&quot;, 465)
+    if server:
+        server.login(sender, pw)
+    for i, r in enumerate(rows, 1):
+        msg = EmailMessage()
+        msg[&quot;From&quot;], msg[&quot;To&quot;], msg[&quot;Subject&quot;] = sender, r[&quot;email&quot;], &quot;🎉 Your TechVerse 2026 Certificate&quot;
+        msg.set_content(f&quot;Hi {r[&#x27;name&#x27;]},\n\nThank you for attending! Your certificate is attached.\n\n— Team TechVerse&quot;)
+        file = out / f&quot;{i:03d}_{r[&#x27;name&#x27;].replace(&#x27; &#x27;, &#x27;_&#x27;)}.png&quot;
+        msg.add_attachment(file.read_bytes(), maintype=&quot;image&quot;, subtype=&quot;png&quot;, filename=file.name)
+        if server:
+            server.send_message(msg)
+        print(f&quot;   {&#x27;📨 sent&#x27; if server else &#x27;👀 would send&#x27;} → {r[&#x27;email&#x27;]}&quot;)
+    if server:
+        server.quit()
+
+
+if __name__ == &quot;__main__&quot;:
+    print(&quot;\n  ⚙️  AUTOPILOT — Python Automation\n&quot;)
+    while True:
+        print(&quot;  A) Generate certificates   B) Organise a messy folder   C) Email certificates   Q) Quit&quot;)
+        ch = input(&quot;  Choose: &quot;).strip().upper()
+        if ch == &quot;A&quot;: task_certificates()
+        elif ch == &quot;B&quot;: task_organize(input(&quot;   Folder path (Enter = demo folder): &quot;).strip() or None)
+        elif ch == &quot;C&quot;: task_email()
+        elif ch == &quot;Q&quot;: break
+        print()
+</pre></div>
+</div>
+<script>
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==b.dataset.tab);
+}));
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const FIRST = ["Arun","Priya","Karthik","Divya","Vignesh","Keerthana","Surya","Nivetha","Rahul","Swetha","Aakash","Harini","Gokul","Lavanya","Sanjay","Meena","Pradeep","Yamini","Dinesh","Janani"];
+const LAST = ["Kumar","R","S","Raj","M","Krishnan","V","Murugan","Selvam","Balaji"];
+const COURSES = ["Full Stack","Python","Data Science","Gen AI"];
+$("names").value = Array.from({length:50},(_,i)=>`${FIRST[(i*7)%20]} ${LAST[(i*3)%10]}, ${COURSES[i%4]}`).join("\n");
+
+const cv = $("preview"), ctx = cv.getContext("2d");
+function drawCert(name, course, event){
+  const W=1600,H=1130, g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#0b0b1e"); g.addColorStop(1,"#26205a"); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="#ffd23f"; ctx.lineWidth=6; ctx.strokeRect(40,40,W-80,H-80);
+  ctx.strokeStyle="#7c5cff"; ctx.lineWidth=2; ctx.strokeRect(62,62,W-124,H-124);
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  const t=(y,s,font,c)=>{ctx.font=font;ctx.fillStyle=c;ctx.fillText(s,W/2,y,W-200)};
+  t(190,"CERTIFICATE","700 104px Cinzel, Georgia, serif","#ffd23f");
+  t(280,"OF  ACHIEVEMENT","600 40px Outfit, sans-serif","#00d4ff");
+  t(400,"This is proudly presented to","400 36px Outfit, sans-serif","#cfd3ff");
+  t(510,name,"800 92px Outfit, sans-serif","#ffffff");
+  ctx.fillStyle="#ffd23f"; ctx.fillRect(W/2-400,574,800,3);
+  t(660,`for successfully attending ${event} on`,"400 34px Outfit, sans-serif","#cfd3ff");
+  t(735,course,"800 60px Outfit, sans-serif","#2bd67b");
+  t(905,new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"}),"400 30px Outfit, sans-serif","#a3a8c3");
+  t(950,"Date","400 24px Outfit, sans-serif","#6b6f8f");
+  ctx.beginPath(); ctx.arc(W-240,910,90,0,Math.PI*2); ctx.strokeStyle="#ffd23f"; ctx.lineWidth=5; ctx.stroke();
+  ctx.font="800 26px Outfit, sans-serif"; ctx.fillStyle="#ffd23f"; ctx.fillText("VERIFIED",W-240,910);
+}
+let made = [];
+$("go").onclick = async () => {
+  await document.fonts.ready;
+  const list = $("names").value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const [n,c]=l.split(",");return {name:n.trim(),course:(c||"Gen AI").trim()}});
+  if (!list.length) { $("status").textContent = "Add at least one name."; return; }
+  made = []; $("gallery").innerHTML = ""; $("zip").hidden = true; $("go").disabled = true;
+  const t0 = performance.now();
+  for (let i=0;i<list.length;i++){
+    drawCert(list[i].name, list[i].course, $("event").value.trim() || "our seminar");
+    const blob = await new Promise(r=>cv.toBlob(r,"image/png"));
+    made.push({file:`${String(i+1).padStart(3,"0")}_${list[i].name.replace(/\s+/g,"_")}.png`, blob});
+    const img = new Image(); img.src = URL.createObjectURL(blob); img.alt = list[i].name; img.title = list[i].name;
+    img.onclick = () => { drawCert(list[i].name, list[i].course, $("event").value); };
+    $("gallery").appendChild(img);
+    $("bar").style.width = ((i+1)/list.length*100)+"%";
+    $("status").textContent = `🖨️ ${i+1}/${list.length}  ${list[i].name}`;
+    $("tBot").textContent = ((performance.now()-t0)/1000).toFixed(1)+" s";
+    $("tHand").textContent = (i+1)*3 + " min";
+    await new Promise(r=>setTimeout(r,30));
+  }
+  $("status").textContent = `✅ ${list.length} certificates done in ${((performance.now()-t0)/1000).toFixed(1)} s. By hand: about ${(list.length*3/60).toFixed(1)} hours.`;
+  $("go").disabled = false;
+  if (dl && window.JSZip) $("zip").hidden = false;
+};
+let dl = null;
+(async () => { try { dl = await window.claude?.use?.("downloads"); } catch {} })();
+$("zip").onclick = async () => {
+  $("dl").textContent = "Packing ZIP…";
+  const zip = new JSZip(); made.forEach(m=>zip.file(m.file, m.blob));
+  const data = await zip.generateAsync({type:"blob"});
+  try { await dl.save({filename:"certificates.zip", data}); $("dl").textContent = ""; }
+  catch (e) { $("dl").textContent = "Download was not saved."; }
+};
+drawCert("Your Name Here","Gen AI","TechVerse 2026 Seminar");
+
+// ---- Task B: folder organiser ----
+const TYPES = {Images:[".jpg",".png",".gif",".webp"],Documents:[".pdf",".docx",".txt",".pptx",".xlsx"],Videos:[".mp4",".mkv"],Music:[".mp3",".wav"],Code:[".py",".js",".html",".java"],Archives:[".zip",".rar"],Installers:[".exe",".apk"]};
+const ICON = {Images:"🖼️",Documents:"📄",Videos:"🎬",Music:"🎵",Code:"💻",Archives:"🗜️",Installers:"📦",Others:"❓"};
+const WORDS = ["resume","IMG_2041","notes","project_final_final","song","setup","marksheet","trip","assignment","meme","WhatsApp_Image","lab_record"];
+const EXTS = Object.values(TYPES).flat().concat([".xyz"]);
+let files = [];
+function mess(){
+  files = Array.from({length:60},(_,i)=>WORDS[Math.floor(Math.random()*WORDS.length)]+"_"+i+EXTS[Math.floor(Math.random()*EXTS.length)]);
+  $("pile").innerHTML = files.map(f=>`<span class="file">${f}</span>`).join("");
+  $("folders").innerHTML = ""; $("sStatus").textContent = `📂 Downloads: ${files.length} files, total chaos.`;
+}
+$("mess").onclick = mess;
+$("sort").onclick = async () => {
+  if (!files.length) mess();
+  const kinds = [...Object.keys(TYPES),"Others"];
+  $("folders").innerHTML = kinds.map(k=>`<div class="folder"><h4>${ICON[k]} ${k}<span id="n_${k}">0</span></h4><div class="mess" id="d_${k}"></div></div>`).join("");
+  const pile = [...$("pile").children];
+  for (let i=0;i<files.length;i++){
+    const f = files[i], ext = f.slice(f.lastIndexOf(".")), k = kinds.find(k=>TYPES[k]?.includes(ext)) || "Others";
+    $("d_"+k).appendChild(pile[i]); $("n_"+k).textContent = +$("n_"+k).textContent + 1;
+    await new Promise(r=>setTimeout(r,25));
+  }
+  $("sStatus").textContent = `✅ ${files.length} files sorted into ${kinds.filter(k=>+$("n_"+k).textContent).length} folders in ${(files.length*0.025).toFixed(1)} s.`;
+  files = [];
+};
+mess();
+</script>
+</body></html>
